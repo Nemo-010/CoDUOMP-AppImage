@@ -13,12 +13,17 @@ pacman -Syu --noconfirm \
 	minizip          \
 	nasm             \
 	openal           \
-	patchelf         \
-	sdl2
+	patchelf
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
 get-debloated-pkgs --add-mesa --prefer-nano libdecor-mini
+
+echo "Building sdl2..."
+echo "---------------------------------------------------------------"
+# Arch's 'sdl2' is sdl2-compat, a reimplementation on top of SDL3; the
+# client links against the real SDL2
+make-aur-package sdl2
 
 echo "Building libjpeg6-turbo..."
 echo "---------------------------------------------------------------"
