@@ -20,6 +20,8 @@
 
 Unofficial AppImage of [Open CoD:UO](https://github.com/opencoduo/coduomp), an open-source client for **Call of Duty: United Offensive** multiplayer.
 
+The icon is upstream's own `assets/coduomp-icon-master.png`, resized to 512x512.
+
 AppImage made using [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages/blob/main/useful-tools/quick-sharun.sh), which makes it extremely easy to turn any binary into a portable package reliably without using containers or similar tricks.
 
 **This AppImage bundles everything and it should work on any Linux distro, including old and musl-based ones.**
