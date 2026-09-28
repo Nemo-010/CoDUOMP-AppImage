@@ -39,8 +39,11 @@ This AppImage contains the client engine and its modules only. **Call of Duty: U
 On first launch the launcher looks for a retail root containing both `main/pak0.pk3` and `uo/pakuo00.pk3`:
 
 1. the `CODUOMP_DATA_PATH` environment variable, if set;
-2. a previously saved path;
-3. Steam app **2640**, across all configured Steam libraries.
+2. the working directory, so running the AppImage from the game directory works;
+3. a previously saved path;
+4. Steam app **2640**, across all configured Steam libraries.
+
+If you pass `+set fs_cdpath` yourself, that is used as-is.
 
 If nothing is found, set the path explicitly:
 

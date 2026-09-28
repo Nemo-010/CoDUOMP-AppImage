@@ -34,15 +34,22 @@ _coduomp_steam_library_paths() {
 }
 
 _coduomp_data_conf=$CONFIGDIR/opencoduo/data-path
-if [ -z "${CODUOMP_DATA_PATH:-}" ] && [ -f "$_coduomp_data_conf" ]; then
-	CODUOMP_DATA_PATH=$(sed -n '1p' "$_coduomp_data_conf")
-fi
 
 # an explicit '+set fs_cdpath' from the command line is left alone
 _coduomp_user_cdpath=
 for _arg in "$@"; do
 	[ "$_arg" = fs_cdpath ] && _coduomp_user_cdpath=1
 done
+
+# the client reads its working directory by default, so running the AppImage
+# from the game directory has to keep working
+if [ -z "${CODUOMP_DATA_PATH:-}" ] && _coduomp_data_root_ok "$PWD"; then
+	CODUOMP_DATA_PATH=$PWD
+fi
+
+if [ -z "${CODUOMP_DATA_PATH:-}" ] && [ -f "$_coduomp_data_conf" ]; then
+	CODUOMP_DATA_PATH=$(sed -n '1p' "$_coduomp_data_conf")
+fi
 
 if [ -z "${CODUOMP_DATA_PATH:-}" ] && [ -z "$_coduomp_user_cdpath" ]; then
 	_coduomp_home=${HOST_HOME:-$HOME}
