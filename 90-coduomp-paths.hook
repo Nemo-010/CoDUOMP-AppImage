@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# Sourced by the generated AppRun. Open CoD:UO loads its bundled cgame/ui
+# modules from fs_basepath and the retail assets from fs_cdpath. The client
+# has no game data discovery on Linux, so both are passed on the command line.
+
+_coduomp_has_pk3() {
+	for _pk3 in "$1"/*.pk3; do
+		[ -e "$_pk3" ] && return 0
+	done
+	return 1
+}
+
+_coduomp_data_root_ok() {
+	[ -d "$1/main" ] && [ -d "$1/uo" ] &&
+		_coduomp_has_pk3 "$1/main" &&
+		_coduomp_has_pk3 "$1/uo"
+}
+
+_coduomp_steam_data_root() {
+	[ -d "$1/steamapps" ] || return 1
+	_manifest=$1/steamapps/appmanifest_2640.acf
+	[ -f "$_manifest" ] || return 1
+	_installdir=$(sed -n 's/.*"installdir"[[:space:]]*"\([^"]*\)".*/\1/p' \
+		"$_manifest" | head -n 1)
+	[ -n "$_installdir" ] || return 1
+	printf '%s\n' "$1/steamapps/common/$_installdir"
+}
+
+_coduomp_steam_library_paths() {
+	[ -f "$1/steamapps/libraryfolders.vdf" ] || return 0
+	sed -n 's/.*"path"[[:space:]]*"\([^"]*\)".*/\1/p' \
+		"$1/steamapps/libraryfolders.vdf"
+}
+
+_coduomp_data_conf=$CONFIGDIR/opencoduo/data-path
+if [ -z "${CODUOMP_DATA_PATH:-}" ] && [ -f "$_coduomp_data_conf" ]; then
+	CODUOMP_DATA_PATH=$(sed -n '1p' "$_coduomp_data_conf")
+fi
+
+# an explicit '+set fs_cdpath' from the command line is left alone
+_coduomp_user_cdpath=
+for _arg in "$@"; do
+	[ "$_arg" = fs_cdpath ] && _coduomp_user_cdpath=1
+done
+
+if [ -z "${CODUOMP_DATA_PATH:-}" ] && [ -z "$_coduomp_user_cdpath" ]; then
+	_coduomp_home=${HOST_HOME:-$HOME}
+	# split the library list on newlines only, so paths with spaces survive
+	_coduomp_ifs=$IFS
+	IFS='
+'
+	for _steam in \
+		"$_coduomp_home/.steam/steam" \
+		"$_coduomp_home/.local/share/Steam" \
+		"$_coduomp_home/.var/app/com.valvesoftware.Steam/data/Steam"
+	do
+		[ -d "$_steam/steamapps" ] || continue
+		for _lib in $_steam $(_coduomp_steam_library_paths "$_steam"); do
+			[ -n "$_lib" ] || continue
+			_candidate=$(_coduomp_steam_data_root "$_lib") || continue
+			if _coduomp_data_root_ok "$_candidate"; then
+				CODUOMP_DATA_PATH=$_candidate
+				break 2
+			fi
+		done
+	done
+	IFS=$_coduomp_ifs
+fi
+
+if [ -z "$_coduomp_user_cdpath" ]; then
+	if [ -z "${CODUOMP_DATA_PATH:-}" ]; then
+		err_msg "Call of Duty: United Offensive game data was not found."
+		err_msg "Set CODUOMP_DATA_PATH to a retail install containing main/ and uo/,"
+		err_msg "for example:"
+		err_msg "  CODUOMP_DATA_PATH=\"\$HOME/.steam/steam/steamapps/common/Call of Duty United Offensive\""
+		err_msg "or write that path into '$_coduomp_data_conf'"
+		exit 1
+	fi
+	if ! _coduomp_data_root_ok "$CODUOMP_DATA_PATH"; then
+		err_msg "'$CODUOMP_DATA_PATH' has no main/ and uo/ pak files!"
+		err_msg "Point CODUOMP_DATA_PATH at the retail installation."
+		exit 1
+	fi
+	mkdir -p "${_coduomp_data_conf%/*}" 2>/dev/null || :
+	printf '%s\n' "$CODUOMP_DATA_PATH" >"$_coduomp_data_conf" 2>/dev/null || :
+	set -- +set fs_basepath "$APPDIR" \
+		+set fs_cdpath "$CODUOMP_DATA_PATH" "$@"
+else
+	set -- +set fs_basepath "$APPDIR" "$@"
+fi
+
+unset -f _coduomp_has_pk3 _coduomp_data_root_ok \
+	_coduomp_steam_data_root _coduomp_steam_library_paths

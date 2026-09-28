@@ -41,11 +41,9 @@ find "$APPDIR"/lib -type d -empty -delete
 # lib.path was written before the move, so it still lists the old location
 "$APPDIR"/sharun -g
 
-# quick-sharun generates its own AppRun.sh, so ours replaces it afterwards.
-# The client needs fs_cdpath pointed at the retail game data, which only a
-# custom launcher can do.
-cp -f AppRun.sh "$APPDIR"/AppRun.sh
-chmod +x "$APPDIR"/AppRun.sh
+# quick-sharun generates AppRun itself; the paths the client needs are set
+# from a hook, which AppRun sources from bin/
+cp -f 90-coduomp-paths.hook "$APPDIR"/bin/90-coduomp-paths.hook
 
 # Turn AppDir into AppImage
 quick-sharun --make-appimage
