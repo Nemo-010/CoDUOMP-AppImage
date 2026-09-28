@@ -3,7 +3,14 @@
 set -eu
 
 ARCH=$(uname -m)
-export VERSION=$(curl -Ls https://api.github.com/repos/opencoduo/coduomp/releases/latest | jq -r '.tag_name')
+export VERSION=$(git ls-remote --tags --refs --sort=-v:refname \
+	https://github.com/opencoduo/coduomp.git |
+	sed 's|.*refs/tags/||' |
+	head -n 1)
+if [ -z "$VERSION" ]; then
+	echo "Could not determine the current version!" >&2
+	exit 1
+fi
 export ARCH
 export OUTPATH=./dist
 export OUTNAME=CoDUOMP-"$ARCH".AppImage
