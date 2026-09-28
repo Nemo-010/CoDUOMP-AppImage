@@ -3,6 +3,7 @@
 set -eu
 
 ARCH=$(uname -m)
+export VERSION=$(curl -Ls https://api.github.com/repos/opencoduo/coduomp/releases/latest | jq -r '.tag_name')
 export ARCH
 export OUTPATH=./dist
 export OUTNAME=CoDUOMP-"$ARCH".AppImage
@@ -14,7 +15,7 @@ export MAIN_BIN=CoDUOMP
 export APPDIR=${PWD}/AppDir
 export DEPLOY_SDL=1
 export DEPLOY_OPENGL=1
-export DEPLOY_VULKAN=1
+export DEPLOY_VULKAN=0
 export DEPLOY_PULSE=1
 export ANYLINUX_LIB=1
 
