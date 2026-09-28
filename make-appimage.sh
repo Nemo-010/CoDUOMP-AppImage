@@ -11,6 +11,7 @@ export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}
 export ICON=./opencoduo.png
 export DESKTOP=./opencoduo.desktop
 export MAIN_BIN=CoDUOMP
+export APPDIR=${PWD}/AppDir
 export DEPLOY_SDL=1
 export DEPLOY_OPENGL=1
 export DEPLOY_VULKAN=1
