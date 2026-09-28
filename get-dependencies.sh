@@ -10,8 +10,8 @@ pacman -Syu --noconfirm \
 	base-devel       \
 	curl             \
 	libdecor         \
-	libjpeg-turbo    \
 	minizip          \
+	nasm             \
 	openal           \
 	patchelf         \
 	sdl2
@@ -19,6 +19,12 @@ pacman -Syu --noconfirm \
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
 get-debloated-pkgs --add-mesa --prefer-nano libdecor-mini
+
+echo "Building libjpeg6-turbo..."
+echo "---------------------------------------------------------------"
+# the client links against libjpeg.so.62 (LIBJPEG_6.2), which no Arch package
+# provides; Arch's libjpeg-turbo is soname 8
+make-aur-package libjpeg6-turbo
 
 echo "Downloading Open CoD:UO release 7..."
 echo "---------------------------------------------------------------"
